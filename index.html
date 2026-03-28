@@ -1,0 +1,1966 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Start</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── CSS Variables ── */
+      :root {
+        --bg: #0d0d0f;
+        --bg-panel: rgba(255, 255, 255, 0.035);
+        --bg-input: rgba(255, 255, 255, 0.06);
+        --bg-item: rgba(255, 255, 255, 0.04);
+        --bg-item-hov: rgba(255, 255, 255, 0.07);
+        --bg-filter: rgba(255, 255, 255, 0.04);
+        --bg-filt-act: rgba(255, 255, 255, 0.1);
+        --border: rgba(255, 255, 255, 0.08);
+        --border-foc: rgba(255, 255, 255, 0.25);
+        --text: #f0ede8;
+        --text-2: rgba(240, 237, 232, 0.5);
+        --text-3: rgba(240, 237, 232, 0.28);
+        --accent: #c8b89a;
+        --accent-2: #a89278;
+        --red: #e07070;
+        --green: #78c896;
+        --shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+        --grain-op: 0.035;
+      }
+      [data-theme="light"] {
+        --bg: #f4f1ec;
+        --bg-panel: rgba(0, 0, 0, 0.035);
+        --bg-input: rgba(0, 0, 0, 0.055);
+        --bg-item: rgba(0, 0, 0, 0.04);
+        --bg-item-hov: rgba(0, 0, 0, 0.07);
+        --bg-filter: rgba(0, 0, 0, 0.04);
+        --bg-filt-act: rgba(0, 0, 0, 0.1);
+        --border: rgba(0, 0, 0, 0.1);
+        --border-foc: rgba(0, 0, 0, 0.3);
+        --text: #1a1814;
+        --text-2: rgba(26, 24, 20, 0.5);
+        --text-3: rgba(26, 24, 20, 0.3);
+        --accent: #8a6f4e;
+        --accent-2: #6e5540;
+        --red: #c04040;
+        --green: #3a8a56;
+        --shadow: 0 32px 80px rgba(0, 0, 0, 0.12);
+        --grain-op: 0.025;
+      }
+
+      /* ── Reset ── */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: "DM Mono", monospace;
+        background: var(--bg);
+        color: var(--text);
+        transition:
+          background 0.4s,
+          color 0.4s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        opacity: var(--grain-op);
+        pointer-events: none;
+        z-index: 9999;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(200, 184, 154, 0.06) 0%,
+          transparent 70%
+        );
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+        transition: opacity 0.4s;
+      }
+
+      /* ── Layout ── */
+      .page {
+        width: min(960px, 94vw);
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        grid-template-rows: 1fr;
+        gap: 20px;
+        align-items: stretch;
+        animation: pageIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes pageIn {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .left-col {
+        grid-column: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .right-col {
+        grid-column: 2;
+        display: flex;
+        flex-direction: column;
+      }
+      .left-col .clock-panel {
+        flex: 1;
+      }
+      .right-col .todo-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      #todos {
+        flex: 1;
+      }
+
+      /* ── Panel ── */
+      .panel {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition:
+          background 0.4s,
+          border-color 0.4s;
+      }
+
+      /* ── Clock ── */
+      .clock-panel {
+        padding: 36px 40px 32px;
+      }
+      .clock-time {
+        font-family: "DM Serif Display", serif;
+        font-size: clamp(64px, 8vw, 96px);
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        transition: color 0.4s;
+        user-select: none;
+      }
+      .clock-time .colon {
+        animation: blink 1s step-end infinite;
+        display: inline-block;
+        width: 0.45em;
+        text-align: center;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+      .clock-seconds {
+        font-size: 13px;
+        font-weight: 300;
+        color: var(--text-2);
+        margin-top: 6px;
+        letter-spacing: 0.12em;
+      }
+      .clock-date {
+        font-size: 12px;
+        font-weight: 300;
+        color: var(--text-3);
+        margin-top: 2px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      /* ── Weather ── */
+      .weather-panel {
+        padding: 22px 26px;
+      }
+      .weather-inner {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .weather-icon {
+        font-size: 38px;
+        line-height: 1;
+        flex-shrink: 0;
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+      }
+      .weather-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .weather-temp {
+        font-family: "DM Serif Display", serif;
+        font-size: 32px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+      .weather-desc {
+        font-size: 11px;
+        color: var(--text-2);
+        margin-top: 3px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .weather-loc {
+        font-size: 10px;
+        color: var(--text-3);
+        margin-top: 2px;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .weather-loading {
+        font-size: 11px;
+        color: var(--text-3);
+        letter-spacing: 0.06em;
+      }
+
+      /* ── Todo panel ── */
+      .todo-panel {
+        padding: 22px 22px 18px;
+      }
+      .todo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+      .todo-title {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-3);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .todo-header-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .counter {
+        font-size: 10px;
+        color: var(--text-3);
+        background: var(--bg-input);
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        letter-spacing: 0.04em;
+        transition: background 0.3s;
+      }
+      .icon-btn {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .icon-btn:hover {
+        border-color: var(--border-foc);
+      }
+
+      /* Input row */
+      .input-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      #todo-input {
+        flex: 1;
+        padding: 9px 13px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        font-size: 12px;
+        font-family: "DM Mono", monospace;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          background 0.3s;
+      }
+      #todo-input::placeholder {
+        color: var(--text-3);
+      }
+      #todo-input:focus {
+        border-color: var(--border-foc);
+        box-shadow: 0 0 0 3px rgba(200, 184, 154, 0.08);
+      }
+      #todo-input.error {
+        border-color: var(--red) !important;
+        animation: shake 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-4px);
+        }
+        60% {
+          transform: translateX(4px);
+        }
+      }
+
+      .add-btn {
+        padding: 9px 15px;
+        border-radius: 10px;
+        border: none;
+        background: var(--accent);
+        color: var(--bg);
+        font-size: 12px;
+        font-weight: 500;
+        font-family: "DM Mono", monospace;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.15s;
+      }
+      .add-btn:hover {
+        background: var(--accent-2);
+        transform: translateY(-1px);
+      }
+      .add-btn:active {
+        transform: translateY(0);
+      }
+
+      .filters {
+        display: flex;
+        gap: 3px;
+        background: var(--bg-filter);
+        padding: 3px;
+        border-radius: 9px;
+        margin-bottom: 10px;
+      }
+      .filter-btn {
+        flex: 1;
+        padding: 5px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--text-3);
+        font-size: 10px;
+        font-family: "DM Mono", monospace;
+        cursor: pointer;
+        letter-spacing: 0.06em;
+        transition: all 0.15s;
+      }
+      .filter-btn.active {
+        background: var(--bg-filt-act);
+        color: var(--text);
+      }
+      .filter-btn:hover:not(.active) {
+        color: var(--text-2);
+      }
+
+      .todos {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        max-height: 280px;
+        overflow-y: auto;
+        padding-right: 2px;
+        min-height: 16px;
+      }
+      .todos::-webkit-scrollbar {
+        width: 3px;
+      }
+      .todos::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .todos::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+
+      .empty-state {
+        font-size: 11px;
+        color: var(--text-3);
+        text-align: center;
+        padding: 20px 0;
+        letter-spacing: 0.06em;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        background: var(--bg-item);
+        padding: 9px 11px;
+        border-radius: 9px;
+        border: 1px solid transparent;
+        transition:
+          background 0.2s,
+          border-color 0.2s,
+          opacity 0.2s;
+        animation: itemIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes itemIn {
+        from {
+          opacity: 0;
+          transform: translateX(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .todo-item:hover {
+        background: var(--bg-item-hov);
+        border-color: var(--border);
+      }
+      .todo-item.done {
+        opacity: 0.45;
+      }
+      .todo-item.done .todo-text {
+        text-decoration: line-through;
+        color: var(--text-2);
+      }
+      .todo-item.removing {
+        animation: itemOut 0.18s cubic-bezier(0.4, 0, 1, 1) forwards;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      @keyframes itemOut {
+        from {
+          opacity: 1;
+          max-height: 50px;
+          padding: 9px 11px;
+        }
+        to {
+          opacity: 0;
+          max-height: 0;
+          padding: 0;
+          margin: 0;
+          border-width: 0;
+        }
+      }
+
+      .checkbox {
+        width: 15px;
+        height: 15px;
+        border-radius: 4px;
+        border: 1.5px solid var(--border);
+        cursor: pointer;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .checkbox:hover {
+        border-color: var(--accent);
+      }
+      .checkbox.checked {
+        background: var(--green);
+        border-color: var(--green);
+      }
+      .checkbox.checked::after {
+        content: "";
+        width: 4px;
+        height: 6px;
+        border: 1.5px solid var(--bg);
+        border-top: none;
+        border-left: none;
+        transform: rotate(45deg) translateY(-1px);
+        display: block;
+      }
+      .todo-text {
+        flex: 1;
+        font-size: 12px;
+        color: var(--text);
+        word-break: break-word;
+        line-height: 1.4;
+        cursor: default;
+        transition: color 0.2s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+      }
+      .edit-input {
+        flex: 1;
+        font-size: 12px;
+        font-family: "DM Mono", monospace;
+        color: var(--text);
+        background: var(--bg-input);
+        border: 1px solid var(--border-foc);
+        border-radius: 5px;
+        padding: 2px 6px;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(200, 184, 154, 0.08);
+        min-width: 0;
+      }
+      .delete-btn {
+        padding: 3px 7px;
+        border-radius: 5px;
+        border: none;
+        background: transparent;
+        color: var(--text-3);
+        cursor: pointer;
+        font-size: 15px;
+        line-height: 1;
+        font-family: "DM Mono", monospace;
+        transition: all 0.15s;
+        flex-shrink: 0;
+        opacity: 0;
+      }
+      .todo-item:hover .delete-btn {
+        opacity: 1;
+      }
+      .delete-btn:hover {
+        background: rgba(224, 112, 112, 0.12);
+        color: var(--red);
+      }
+
+      .todo-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .footer-info {
+        font-size: 10px;
+        color: var(--text-3);
+        letter-spacing: 0.04em;
+      }
+      .clear-btn {
+        font-size: 10px;
+        color: var(--text-3);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: "DM Mono", monospace;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: all 0.15s;
+        letter-spacing: 0.04em;
+      }
+      .clear-btn:hover {
+        color: var(--red);
+        background: rgba(224, 112, 112, 0.08);
+      }
+      .clear-btn:disabled {
+        opacity: 0.25;
+        cursor: default;
+        pointer-events: none;
+      }
+      .hint {
+        font-size: 10px;
+        color: var(--text-3);
+        text-align: center;
+        opacity: 0.5;
+        letter-spacing: 0.04em;
+        margin-top: 6px;
+      }
+
+      /* ════════════════════════════════════════
+       THEME EDITOR DRAWER
+    ════════════════════════════════════════ */
+      .te-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .te-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .te-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: min(420px, 96vw);
+        background: var(--bg);
+        border-left: 1px solid var(--border);
+        z-index: 1001;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: -24px 0 60px rgba(0, 0, 0, 0.4);
+      }
+      .te-drawer.open {
+        transform: translateX(0);
+      }
+
+      .te-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .te-head-title {
+        font-size: 11px;
+        color: var(--text-3);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .te-close {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+      .te-close:hover {
+        border-color: var(--border-foc);
+      }
+
+      .te-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .te-body::-webkit-scrollbar {
+        width: 3px;
+      }
+      .te-body::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+
+      /* Presets */
+      .te-section-label {
+        font-size: 10px;
+        color: var(--text-3);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .te-presets {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .te-preset-btn {
+        padding: 7px 6px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        font-size: 10px;
+        font-family: "DM Mono", monospace;
+        cursor: pointer;
+        text-align: center;
+        letter-spacing: 0.04em;
+        transition: all 0.15s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .te-preset-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .te-preset-btn.active {
+        border-color: var(--accent);
+        background: rgba(200, 184, 154, 0.1);
+        color: var(--accent);
+      }
+
+      /* Saved themes */
+      .te-saved-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .te-saved-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg-item);
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        transition: all 0.15s;
+      }
+      .te-saved-item:hover {
+        border-color: var(--border);
+      }
+      .te-saved-name {
+        flex: 1;
+        font-size: 11px;
+        color: var(--text);
+        letter-spacing: 0.04em;
+        cursor: pointer;
+      }
+      .te-saved-name:hover {
+        color: var(--accent);
+      }
+      .te-saved-del {
+        font-size: 13px;
+        color: var(--text-3);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 2px 5px;
+        border-radius: 4px;
+        transition: all 0.15s;
+        font-family: "DM Mono", monospace;
+      }
+      .te-saved-del:hover {
+        color: var(--red);
+        background: rgba(224, 112, 112, 0.1);
+      }
+      .te-no-saved {
+        font-size: 11px;
+        color: var(--text-3);
+        letter-spacing: 0.04em;
+      }
+
+      /* Variable groups */
+      .te-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .te-row {
+        display: grid;
+        grid-template-columns: 110px 1fr 40px;
+        align-items: center;
+        gap: 8px;
+      }
+      .te-var-name {
+        font-size: 10px;
+        color: var(--text-3);
+        letter-spacing: 0.06em;
+      }
+      .te-var-input {
+        flex: 1;
+        padding: 5px 8px;
+        border-radius: 7px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        font-size: 11px;
+        font-family: "DM Mono", monospace;
+        outline: none;
+        transition: border-color 0.2s;
+        min-width: 0;
+      }
+      .te-var-input:focus {
+        border-color: var(--border-foc);
+      }
+      .te-color-swatch {
+        width: 32px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        padding: 0;
+        overflow: hidden;
+        transition: border-color 0.15s;
+      }
+      .te-color-swatch::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      .te-color-swatch::-webkit-color-swatch {
+        border: none;
+        border-radius: 5px;
+      }
+      .te-color-swatch:hover {
+        border-color: var(--border-foc);
+      }
+
+      /* Save / Import / Export row */
+      .te-foot {
+        padding: 14px 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .te-save-row {
+        display: flex;
+        gap: 7px;
+      }
+      .te-name-input {
+        flex: 1;
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        font-size: 11px;
+        font-family: "DM Mono", monospace;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .te-name-input:focus {
+        border-color: var(--border-foc);
+      }
+      .te-name-input::placeholder {
+        color: var(--text-3);
+      }
+
+      .te-action-btn {
+        padding: 7px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-input);
+        color: var(--text);
+        font-size: 10px;
+        font-family: "DM Mono", monospace;
+        cursor: pointer;
+        white-space: nowrap;
+        letter-spacing: 0.04em;
+        transition: all 0.15s;
+      }
+      .te-action-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .te-action-btn.primary {
+        background: var(--accent);
+        color: var(--bg);
+        border-color: var(--accent);
+        font-weight: 500;
+      }
+      .te-action-btn.primary:hover {
+        background: var(--accent-2);
+        border-color: var(--accent-2);
+      }
+
+      .te-io-row {
+        display: flex;
+        gap: 7px;
+      }
+
+      .te-toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: var(--bg-item-hov);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 11px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        letter-spacing: 0.04em;
+        z-index: 2000;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .te-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Responsive */
+      @media (max-width: 680px) {
+        html,
+        body {
+          overflow: auto;
+        }
+        .page {
+          grid-template-columns: 1fr;
+          padding: 24px 0;
+          width: 92vw;
+        }
+        .left-col,
+        .right-col {
+          grid-column: 1;
+        }
+        .clock-time {
+          font-size: 56px;
+        }
+        .te-drawer {
+          width: 100vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Main page ── -->
+    <div class="page">
+      <div class="left-col">
+        <div class="panel clock-panel">
+          <div class="clock-time">
+            <span id="cl-h">00</span><span class="colon">:</span
+            ><span id="cl-m">00</span>
+          </div>
+          <div class="clock-seconds"><span id="cl-s">00</span></div>
+          <div class="clock-date" id="cl-date"></div>
+        </div>
+        <div class="panel weather-panel">
+          <div id="weather-widget">
+            <p class="weather-loading">fetching weather…</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="panel todo-panel">
+          <div class="todo-header">
+            <span class="todo-title">tasks</span>
+            <div class="todo-header-right">
+              <span class="counter" id="counter">0 left</span>
+              <button class="icon-btn" id="theme-btn" title="Toggle dark/light">
+                ☀️
+              </button>
+              <button class="icon-btn" id="te-open-btn" title="Theme editor">
+                🎨
+              </button>
+            </div>
+          </div>
+          <div class="input-row">
+            <input
+              type="text"
+              id="todo-input"
+              placeholder="new task…"
+              autocomplete="off"
+            />
+            <button class="add-btn" id="add-btn">add</button>
+          </div>
+          <div class="filters" id="filters">
+            <button class="filter-btn active" data-filter="all">all</button>
+            <button class="filter-btn" data-filter="active">active</button>
+            <button class="filter-btn" data-filter="done">done</button>
+          </div>
+          <div class="todos" id="todos">
+            <p class="empty-state" id="empty">nothing yet_</p>
+          </div>
+          <div class="todo-footer">
+            <span class="footer-info" id="footer-info"></span>
+            <button class="clear-btn" id="clear-btn" disabled>
+              clear done
+            </button>
+          </div>
+          <p class="hint">dbl-click to edit &middot; esc cancels</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Theme editor overlay + drawer ── -->
+    <div class="te-overlay" id="te-overlay"></div>
+    <div class="te-drawer" id="te-drawer">
+      <div class="te-head">
+        <span class="te-head-title">theme editor</span>
+        <button class="te-close" id="te-close">✕</button>
+      </div>
+
+      <div class="te-body">
+        <!-- Presets -->
+        <div>
+          <div class="te-section-label">presets</div>
+          <div class="te-presets" id="te-presets"></div>
+        </div>
+
+        <!-- Saved themes -->
+        <div>
+          <div class="te-section-label">saved themes</div>
+          <div class="te-saved-list" id="te-saved-list"></div>
+        </div>
+
+        <!-- Variable editors — rendered by JS -->
+        <div id="te-vars-container"></div>
+      </div>
+
+      <div class="te-foot">
+        <div class="te-save-row">
+          <input
+            class="te-name-input"
+            id="te-save-name"
+            placeholder="theme name…"
+            autocomplete="off"
+          />
+          <button class="te-action-btn primary" id="te-save-btn">save</button>
+        </div>
+        <div class="te-io-row">
+          <button class="te-action-btn" id="te-export-btn">
+            ↑ export json
+          </button>
+          <button class="te-action-btn" id="te-import-btn">
+            ↓ import json
+          </button>
+          <input
+            type="file"
+            id="te-import-file"
+            accept=".json,application/json"
+            style="display: none"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="te-toast" id="te-toast"></div>
+
+    <script>
+      /* ═══════════════════════════════════════════
+   CLOCK
+═══════════════════════════════════════════ */
+      const clH = document.getElementById("cl-h"),
+        clM = document.getElementById("cl-m"),
+        clS = document.getElementById("cl-s"),
+        clDate = document.getElementById("cl-date");
+      const DAYS = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const MONTHS = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const pad = (n) => String(n).padStart(2, "0");
+      function tickClock() {
+        const n = new Date();
+        clH.textContent = pad(n.getHours());
+        clM.textContent = pad(n.getMinutes());
+        clS.textContent = pad(n.getSeconds());
+        clDate.textContent = `${DAYS[n.getDay()]}, ${MONTHS[n.getMonth()]} ${n.getDate()}`;
+      }
+      tickClock();
+      setInterval(tickClock, 1000);
+
+      /* ═══════════════════════════════════════════
+   WEATHER
+═══════════════════════════════════════════ */
+      const WEATHER_KEY = "weather_cache_v1",
+        WEATHER_TTL = 30 * 60 * 1000;
+      const WMO = {
+        0: ["☀️", "Clear sky"],
+        1: ["🌤️", "Mainly clear"],
+        2: ["⛅", "Partly cloudy"],
+        3: ["☁️", "Overcast"],
+        45: ["🌫️", "Fog"],
+        48: ["🌫️", "Rime fog"],
+        51: ["🌦️", "Light drizzle"],
+        53: ["🌦️", "Drizzle"],
+        55: ["🌧️", "Heavy drizzle"],
+        61: ["🌧️", "Slight rain"],
+        63: ["🌧️", "Moderate rain"],
+        65: ["🌧️", "Heavy rain"],
+        71: ["🌨️", "Slight snow"],
+        73: ["🌨️", "Moderate snow"],
+        75: ["❄️", "Heavy snow"],
+        80: ["🌦️", "Rain showers"],
+        81: ["🌧️", "Rain showers"],
+        82: ["⛈️", "Violent showers"],
+        95: ["⛈️", "Thunderstorm"],
+        96: ["⛈️", "Thunderstorm"],
+        99: ["⛈️", "Thunderstorm"],
+      };
+      function wmoInfo(c) {
+        const k =
+          Object.keys(WMO)
+            .map(Number)
+            .sort((a, b) => b - a)
+            .find((k) => c >= k) ?? 0;
+        return WMO[k] ?? ["🌡️", "Unknown"];
+      }
+      function renderWeather(d) {
+        const [icon, desc] = wmoInfo(d.code);
+        document.getElementById("weather-widget").innerHTML =
+          `<div class="weather-inner"><div class="weather-icon">${icon}</div><div class="weather-info"><div class="weather-temp">${Math.round(d.temp)}°C</div><div class="weather-desc">${desc}</div><div class="weather-loc">${d.city}</div></div></div>`;
+      }
+      function renderWeatherError() {
+        document.getElementById("weather-widget").innerHTML =
+          `<p class="weather-loading">weather unavailable</p>`;
+      }
+      async function reverseGeocode(lat, lon) {
+        try {
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+          );
+          const j = await r.json();
+          return (
+            j.address?.city ||
+            j.address?.town ||
+            j.address?.village ||
+            j.address?.county ||
+            "Unknown"
+          );
+        } catch {
+          return "Unknown";
+        }
+      }
+      async function fetchWeather(lat, lon, city) {
+        const r = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`,
+        );
+        const j = await r.json();
+        const cw = j.current_weather;
+        return {
+          temp: cw.temperature,
+          code: cw.weathercode,
+          city,
+          ts: Date.now(),
+        };
+      }
+      async function loadWeather() {
+        try {
+          const c = JSON.parse(localStorage.getItem(WEATHER_KEY));
+          if (c && Date.now() - c.ts < WEATHER_TTL) {
+            renderWeather(c);
+            return;
+          }
+        } catch {}
+        if (!navigator.geolocation) {
+          renderWeatherError();
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            try {
+              const { latitude: lat, longitude: lon } = pos.coords;
+              const city = await reverseGeocode(lat, lon);
+              const data = await fetchWeather(lat, lon, city);
+              localStorage.setItem(WEATHER_KEY, JSON.stringify(data));
+              renderWeather(data);
+            } catch {
+              renderWeatherError();
+            }
+          },
+          () => renderWeatherError(),
+          { timeout: 8000 },
+        );
+      }
+      loadWeather();
+      setInterval(loadWeather, WEATHER_TTL);
+
+      /* ═══════════════════════════════════════════
+   SOUND
+═══════════════════════════════════════════ */
+      function playBlip(freq = 880, dur = 0.05) {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = "sine";
+          gain.gain.setValueAtTime(0.07, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+          osc.start();
+          osc.stop(ctx.currentTime + dur);
+        } catch {}
+      }
+
+      /* ═══════════════════════════════════════════
+   TODO
+═══════════════════════════════════════════ */
+      const TODOS_KEY = "todos_v1";
+      let todos = loadTodos(),
+        currentFilter = "all";
+
+      const inputEl = document.getElementById("todo-input"),
+        addBtn = document.getElementById("add-btn"),
+        todosEl = document.getElementById("todos"),
+        emptyEl = document.getElementById("empty"),
+        counterEl = document.getElementById("counter"),
+        footerInfo = document.getElementById("footer-info"),
+        clearBtn = document.getElementById("clear-btn"),
+        filtersEl = document.getElementById("filters");
+
+      function loadTodos() {
+        try {
+          return JSON.parse(localStorage.getItem(TODOS_KEY)) || [];
+        } catch {
+          return [];
+        }
+      }
+      function saveTodos() {
+        localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+      }
+      function getCounts() {
+        const done = todos.filter((t) => t.done).length;
+        return { total: todos.length, done, active: todos.length - done };
+      }
+      function updateStatusBar({ total, done, active }) {
+        counterEl.textContent = `${active} left`;
+        footerInfo.textContent = total > 0 ? `${done}/${total} done` : "";
+        clearBtn.disabled = done === 0;
+      }
+      function validate(text) {
+        if (!text) return "empty";
+        if (todos.some((t) => t.text.toLowerCase() === text.toLowerCase()))
+          return "dup";
+        return null;
+      }
+      function shakeInput() {
+        inputEl.classList.remove("error");
+        void inputEl.offsetWidth;
+        inputEl.classList.add("error");
+        setTimeout(() => inputEl.classList.remove("error"), 600);
+      }
+      function getFiltered() {
+        if (currentFilter === "active") return todos.filter((t) => !t.done);
+        if (currentFilter === "done") return todos.filter((t) => t.done);
+        return todos;
+      }
+      function createTodoEl(todo) {
+        const item = document.createElement("div");
+        item.classList.add("todo-item");
+        if (todo.done) item.classList.add("done");
+        item.dataset.id = todo.id;
+        const cb = document.createElement("div");
+        cb.classList.add("checkbox");
+        cb.dataset.action = "toggle";
+        if (todo.done) cb.classList.add("checked");
+        const txt = document.createElement("span");
+        txt.classList.add("todo-text");
+        txt.textContent = todo.text;
+        txt.title = todo.text;
+        const del = document.createElement("button");
+        del.classList.add("delete-btn");
+        del.dataset.action = "delete";
+        del.innerHTML = "&times;";
+        del.setAttribute("aria-label", "Delete");
+        item.append(cb, txt, del);
+        return item;
+      }
+      function render() {
+        const filtered = getFiltered(),
+          counts = getCounts();
+        updateStatusBar(counts);
+        emptyEl.style.display = filtered.length === 0 ? "block" : "none";
+        const existing = new Map();
+        todosEl
+          .querySelectorAll(".todo-item")
+          .forEach((el) => existing.set(el.dataset.id, el));
+        const frag = document.createDocumentFragment();
+        for (const todo of filtered) {
+          if (existing.has(todo.id)) {
+            const el = existing.get(todo.id),
+              cb = el.querySelector(".checkbox"),
+              txt = el.querySelector(".todo-text");
+            if (
+              txt &&
+              !el.querySelector(".edit-input") &&
+              txt.textContent !== todo.text
+            ) {
+              txt.textContent = todo.text;
+              txt.title = todo.text;
+            }
+            el.classList.toggle("done", todo.done);
+            cb.classList.toggle("checked", todo.done);
+            existing.delete(todo.id);
+            frag.appendChild(el);
+          } else {
+            frag.appendChild(createTodoEl(todo));
+          }
+        }
+        existing.forEach((el) => el.remove());
+        todosEl.insertBefore(frag, emptyEl);
+      }
+      function addTodo() {
+        const text = inputEl.value.trim();
+        if (validate(text)) {
+          shakeInput();
+          return;
+        }
+        todos.unshift({ id: crypto.randomUUID(), text, done: false });
+        saveTodos();
+        inputEl.value = "";
+        playBlip(880);
+        render();
+      }
+      function toggleTodo(id) {
+        const t = todos.find((t) => t.id === id);
+        if (!t) return;
+        t.done = !t.done;
+        saveTodos();
+        playBlip(t.done ? 660 : 880, 0.04);
+        render();
+      }
+      function deleteTodo(id, el) {
+        el.classList.add("removing");
+        playBlip(440, 0.08);
+        el.addEventListener(
+          "animationend",
+          () => {
+            todos = todos.filter((t) => t.id !== id);
+            saveTodos();
+            render();
+          },
+          { once: true },
+        );
+      }
+      function clearDone() {
+        todosEl
+          .querySelectorAll(".todo-item.done")
+          .forEach((el) => el.classList.add("removing"));
+        setTimeout(() => {
+          todos = todos.filter((t) => !t.done);
+          saveTodos();
+          render();
+        }, 200);
+      }
+      function startEdit(itemEl) {
+        if (itemEl.querySelector(".edit-input")) return;
+        const todo = todos.find((t) => t.id === itemEl.dataset.id);
+        if (!todo || todo.done) return;
+        const textEl = itemEl.querySelector(".todo-text"),
+          original = todo.text;
+        const ei = document.createElement("input");
+        ei.classList.add("edit-input");
+        ei.value = todo.text;
+        textEl.replaceWith(ei);
+        ei.focus();
+        ei.select();
+        function commit() {
+          const val = ei.value.trim();
+          const isDup =
+            val &&
+            val.toLowerCase() !== original.toLowerCase() &&
+            todos.some(
+              (t) =>
+                t.id !== todo.id && t.text.toLowerCase() === val.toLowerCase(),
+            );
+          if (!val || isDup) {
+            cancel();
+            return;
+          }
+          todo.text = val;
+          saveTodos();
+          render();
+        }
+        function cancel() {
+          const span = document.createElement("span");
+          span.classList.add("todo-text");
+          span.textContent = original;
+          span.title = original;
+          ei.replaceWith(span);
+        }
+        ei.addEventListener("blur", commit, { once: true });
+        ei.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            ei.removeEventListener("blur", commit);
+            commit();
+          }
+          if (e.key === "Escape") {
+            e.preventDefault();
+            ei.removeEventListener("blur", commit);
+            cancel();
+          }
+        });
+      }
+      todosEl.addEventListener("click", (e) => {
+        const itemEl = e.target.closest(".todo-item");
+        if (!itemEl) return;
+        const action = e.target.closest("[data-action]")?.dataset.action;
+        if (action === "toggle") toggleTodo(itemEl.dataset.id);
+        if (action === "delete") deleteTodo(itemEl.dataset.id, itemEl);
+      });
+      todosEl.addEventListener("dblclick", (e) => {
+        const itemEl = e.target.closest(".todo-item");
+        if (itemEl && e.target.closest(".todo-text")) startEdit(itemEl);
+      });
+      filtersEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".filter-btn");
+        if (!btn) return;
+        filtersEl
+          .querySelectorAll(".filter-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.filter;
+        render();
+      });
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") addTodo();
+        if (e.key === "Escape") {
+          inputEl.value = "";
+          inputEl.blur();
+        }
+      });
+      addBtn.addEventListener("click", addTodo);
+      clearBtn.addEventListener("click", clearDone);
+
+      /* ═══════════════════════════════════════════
+   THEME SYSTEM
+═══════════════════════════════════════════ */
+      const THEME_MODE_KEY = "todo_theme_v1";
+      const SAVED_THEMES_KEY = "themes_v1";
+      const ACTIVE_THEME_KEY = "active_theme_v1";
+
+      // ── CSS variable definitions ──
+      const VAR_GROUPS = [
+        {
+          label: "backgrounds",
+          vars: [
+            "--bg",
+            "--bg-panel",
+            "--bg-input",
+            "--bg-item",
+            "--bg-item-hov",
+            "--bg-filter",
+            "--bg-filt-act",
+          ],
+        },
+        { label: "borders", vars: ["--border", "--border-foc"] },
+        { label: "text", vars: ["--text", "--text-2", "--text-3"] },
+        {
+          label: "accents",
+          vars: ["--accent", "--accent-2", "--red", "--green"],
+        },
+      ];
+      // grain-op and shadow are handled separately (non-color)
+      const EXTRA_VARS = ["--shadow", "--grain-op"];
+
+      // ── Built-in presets ──
+      const PRESETS = {
+        "default dark": {
+          "--bg": "#0d0d0f",
+          "--bg-panel": "rgba(255,255,255,.035)",
+          "--bg-input": "rgba(255,255,255,.06)",
+          "--bg-item": "rgba(255,255,255,.04)",
+          "--bg-item-hov": "rgba(255,255,255,.07)",
+          "--bg-filter": "rgba(255,255,255,.04)",
+          "--bg-filt-act": "rgba(255,255,255,.10)",
+          "--border": "rgba(255,255,255,.08)",
+          "--border-foc": "rgba(255,255,255,.25)",
+          "--text": "#f0ede8",
+          "--text-2": "rgba(240,237,232,.5)",
+          "--text-3": "rgba(240,237,232,.28)",
+          "--accent": "#c8b89a",
+          "--accent-2": "#a89278",
+          "--red": "#e07070",
+          "--green": "#78c896",
+          "--shadow": "0 32px 80px rgba(0,0,0,.6)",
+          "--grain-op": ".035",
+        },
+        tokyonight: {
+          "--bg": "#1a1b26",
+          "--bg-panel": "rgba(36,40,59,.8)",
+          "--bg-input": "rgba(36,40,59,.9)",
+          "--bg-item": "rgba(36,40,59,.6)",
+          "--bg-item-hov": "rgba(41,46,66,.9)",
+          "--bg-filter": "rgba(36,40,59,.6)",
+          "--bg-filt-act": "rgba(52,59,88,.9)",
+          "--border": "rgba(86,95,137,.35)",
+          "--border-foc": "rgba(122,162,247,.6)",
+          "--text": "#c0caf5",
+          "--text-2": "rgba(192,202,245,.55)",
+          "--text-3": "rgba(192,202,245,.3)",
+          "--accent": "#7aa2f7",
+          "--accent-2": "#2ac3de",
+          "--red": "#f7768e",
+          "--green": "#9ece6a",
+          "--shadow": "0 32px 80px rgba(0,0,0,.7)",
+          "--grain-op": ".02",
+        },
+        catppuccin: {
+          "--bg": "#1e1e2e",
+          "--bg-panel": "rgba(30,30,46,.95)",
+          "--bg-input": "rgba(49,50,68,.8)",
+          "--bg-item": "rgba(49,50,68,.6)",
+          "--bg-item-hov": "rgba(69,71,90,.8)",
+          "--bg-filter": "rgba(49,50,68,.5)",
+          "--bg-filt-act": "rgba(88,91,112,.8)",
+          "--border": "rgba(88,91,112,.5)",
+          "--border-foc": "rgba(137,180,250,.7)",
+          "--text": "#cdd6f4",
+          "--text-2": "rgba(205,214,244,.55)",
+          "--text-3": "rgba(205,214,244,.3)",
+          "--accent": "#89b4fa",
+          "--accent-2": "#b4befe",
+          "--red": "#f38ba8",
+          "--green": "#a6e3a1",
+          "--shadow": "0 32px 80px rgba(0,0,0,.65)",
+          "--grain-op": ".025",
+        },
+        gruvbox: {
+          "--bg": "#282828",
+          "--bg-panel": "rgba(40,40,40,.97)",
+          "--bg-input": "rgba(60,56,54,.9)",
+          "--bg-item": "rgba(50,48,47,.7)",
+          "--bg-item-hov": "rgba(60,56,54,.9)",
+          "--bg-filter": "rgba(50,48,47,.6)",
+          "--bg-filt-act": "rgba(80,73,69,.9)",
+          "--border": "rgba(168,153,132,.25)",
+          "--border-foc": "rgba(214,165,76,.6)",
+          "--text": "#ebdbb2",
+          "--text-2": "rgba(235,219,178,.55)",
+          "--text-3": "rgba(235,219,178,.3)",
+          "--accent": "#d4a24c",
+          "--accent-2": "#fe8019",
+          "--red": "#fb4934",
+          "--green": "#b8bb26",
+          "--shadow": "0 32px 80px rgba(0,0,0,.7)",
+          "--grain-op": ".04",
+        },
+        kanagawa: {
+          "--bg": "#1f1f28",
+          "--bg-panel": "rgba(31,31,40,.97)",
+          "--bg-input": "rgba(42,42,58,.9)",
+          "--bg-item": "rgba(38,38,52,.7)",
+          "--bg-item-hov": "rgba(48,48,65,.9)",
+          "--bg-filter": "rgba(38,38,52,.6)",
+          "--bg-filt-act": "rgba(54,54,74,.9)",
+          "--border": "rgba(84,84,109,.4)",
+          "--border-foc": "rgba(126,156,216,.6)",
+          "--text": "#dcd7ba",
+          "--text-2": "rgba(220,215,186,.55)",
+          "--text-3": "rgba(220,215,186,.3)",
+          "--accent": "#7e9cd8",
+          "--accent-2": "#957fb8",
+          "--red": "#c34043",
+          "--green": "#76946a",
+          "--shadow": "0 32px 80px rgba(0,0,0,.7)",
+          "--grain-op": ".03",
+        },
+        nord: {
+          "--bg": "#2e3440",
+          "--bg-panel": "rgba(46,52,64,.97)",
+          "--bg-input": "rgba(59,66,82,.8)",
+          "--bg-item": "rgba(55,62,77,.6)",
+          "--bg-item-hov": "rgba(67,76,94,.8)",
+          "--bg-filter": "rgba(55,62,77,.5)",
+          "--bg-filt-act": "rgba(76,86,106,.8)",
+          "--border": "rgba(76,86,106,.5)",
+          "--border-foc": "rgba(136,192,208,.7)",
+          "--text": "#eceff4",
+          "--text-2": "rgba(236,239,244,.55)",
+          "--text-3": "rgba(236,239,244,.3)",
+          "--accent": "#88c0d0",
+          "--accent-2": "#81a1c1",
+          "--red": "#bf616a",
+          "--green": "#a3be8c",
+          "--shadow": "0 32px 80px rgba(0,0,0,.6)",
+          "--grain-op": ".02",
+        },
+        everforest: {
+          "--bg": "#2d353b",
+          "--bg-panel": "rgba(45,53,59,.97)",
+          "--bg-input": "rgba(56,65,72,.8)",
+          "--bg-item": "rgba(51,60,66,.6)",
+          "--bg-item-hov": "rgba(65,75,81,.8)",
+          "--bg-filter": "rgba(51,60,66,.5)",
+          "--bg-filt-act": "rgba(74,82,90,.8)",
+          "--border": "rgba(116,120,96,.3)",
+          "--border-foc": "rgba(167,192,128,.6)",
+          "--text": "#d3c6aa",
+          "--text-2": "rgba(211,198,170,.55)",
+          "--text-3": "rgba(211,198,170,.3)",
+          "--accent": "#a7c080",
+          "--accent-2": "#83c092",
+          "--red": "#e67e80",
+          "--green": "#a7c080",
+          "--shadow": "0 32px 80px rgba(0,0,0,.65)",
+          "--grain-op": ".03",
+        },
+      };
+
+      // ── State ──
+      let isDark = localStorage.getItem(THEME_MODE_KEY) !== "light";
+      let savedThemes = loadSavedThemes();
+      let activePreset =
+        localStorage.getItem(ACTIVE_THEME_KEY) || "default dark";
+
+      function loadSavedThemes() {
+        try {
+          return JSON.parse(localStorage.getItem(SAVED_THEMES_KEY)) || {};
+        } catch {
+          return {};
+        }
+      }
+      function persistSavedThemes() {
+        localStorage.setItem(SAVED_THEMES_KEY, JSON.stringify(savedThemes));
+      }
+
+      // ── Apply a full theme object to :root CSS vars ──
+      function applyThemeVars(themeObj) {
+        const root = document.documentElement;
+        Object.entries(themeObj).forEach(([k, v]) =>
+          root.style.setProperty(k, v),
+        );
+      }
+
+      // ── Read current :root computed vars ──
+      function readCurrentVars() {
+        const style = getComputedStyle(document.documentElement);
+        const result = {};
+        [...VAR_GROUPS.flatMap((g) => g.vars), ...EXTRA_VARS].forEach((v) => {
+          result[v] =
+            document.documentElement.style.getPropertyValue(v).trim() ||
+            style.getPropertyValue(v).trim();
+        });
+        return result;
+      }
+
+      // ── Dark/light toggle ──
+      const themeBtn = document.getElementById("theme-btn");
+      function applyDarkLight() {
+        document.documentElement.dataset.theme = isDark ? "dark" : "light";
+        themeBtn.textContent = isDark ? "☀️" : "🌙";
+        localStorage.setItem(THEME_MODE_KEY, isDark ? "dark" : "light");
+      }
+      themeBtn.addEventListener("click", () => {
+        isDark = !isDark;
+        applyDarkLight();
+      });
+
+      // ── Toast ──
+      const toastEl = document.getElementById("te-toast");
+      let toastTimer;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+      }
+
+      /* ─── Theme Editor DOM ─── */
+      const teOverlay = document.getElementById("te-overlay");
+      const teDrawer = document.getElementById("te-drawer");
+      const teClose = document.getElementById("te-close");
+      const teOpenBtn = document.getElementById("te-open-btn");
+      const tePresets = document.getElementById("te-presets");
+      const teSaved = document.getElementById("te-saved-list");
+      const teVarsCont = document.getElementById("te-vars-container");
+      const teSaveName = document.getElementById("te-save-name");
+      const teSaveBtn = document.getElementById("te-save-btn");
+      const teExport = document.getElementById("te-export-btn");
+      const teImport = document.getElementById("te-import-btn");
+      const teImportFile = document.getElementById("te-import-file");
+
+      function openEditor() {
+        teDrawer.classList.add("open");
+        teOverlay.classList.add("open");
+        buildEditorUI();
+      }
+      function closeEditor() {
+        teDrawer.classList.remove("open");
+        teOverlay.classList.remove("open");
+      }
+
+      teOpenBtn.addEventListener("click", openEditor);
+      teClose.addEventListener("click", closeEditor);
+      teOverlay.addEventListener("click", closeEditor);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && teDrawer.classList.contains("open"))
+          closeEditor();
+      });
+
+      // ── Build presets ──
+      function buildPresets() {
+        tePresets.innerHTML = "";
+        Object.keys(PRESETS).forEach((name) => {
+          const btn = document.createElement("button");
+          btn.className =
+            "te-preset-btn" + (activePreset === name ? " active" : "");
+          btn.textContent = name;
+          btn.addEventListener("click", () => {
+            applyThemeVars(PRESETS[name]);
+            activePreset = name;
+            localStorage.setItem(ACTIVE_THEME_KEY, name);
+            buildPresets();
+            buildVarEditors();
+            showToast(`applied "${name}"`);
+          });
+          tePresets.appendChild(btn);
+        });
+      }
+
+      // ── Build saved themes list ──
+      function buildSavedList() {
+        teSaved.innerHTML = "";
+        const names = Object.keys(savedThemes);
+        if (names.length === 0) {
+          teSaved.innerHTML = `<p class="te-no-saved">no saved themes yet</p>`;
+          return;
+        }
+        names.forEach((name) => {
+          const row = document.createElement("div");
+          row.className = "te-saved-item";
+          const lbl = document.createElement("span");
+          lbl.className = "te-saved-name";
+          lbl.textContent = name;
+          lbl.addEventListener("click", () => {
+            applyThemeVars(savedThemes[name]);
+            activePreset = name;
+            localStorage.setItem(ACTIVE_THEME_KEY, name);
+            buildPresets();
+            buildVarEditors();
+            showToast(`applied "${name}"`);
+          });
+          const del = document.createElement("button");
+          del.className = "te-saved-del";
+          del.textContent = "×";
+          del.addEventListener("click", () => {
+            delete savedThemes[name];
+            persistSavedThemes();
+            buildSavedList();
+            showToast(`deleted "${name}"`);
+          });
+          row.append(lbl, del);
+          teSaved.appendChild(row);
+        });
+      }
+
+      // ── Try to parse a CSS color string into hex for color picker ──
+      function cssToHex(val) {
+        val = val.trim();
+        // Already hex
+        if (/^#[0-9a-f]{3,8}$/i.test(val))
+          return val.length <= 7 ? val : val.slice(0, 7);
+        // rgba/rgb
+        const m = val.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (m) {
+          return (
+            "#" +
+            [m[1], m[2], m[3]]
+              .map((n) => parseInt(n).toString(16).padStart(2, "0"))
+              .join("")
+          );
+        }
+        return null;
+      }
+
+      // ── Build variable editor rows ──
+      function buildVarEditors() {
+        teVarsCont.innerHTML = "";
+        const current = readCurrentVars();
+
+        VAR_GROUPS.forEach((group) => {
+          const sec = document.createElement("div");
+          sec.innerHTML = `<div class="te-section-label">${group.label}</div>`;
+          const rows = document.createElement("div");
+          rows.className = "te-group";
+
+          group.vars.forEach((varName) => {
+            const val = current[varName] || "";
+            const row = document.createElement("div");
+            row.className = "te-row";
+
+            const nameEl = document.createElement("span");
+            nameEl.className = "te-var-name";
+            nameEl.textContent = varName;
+
+            const textInput = document.createElement("input");
+            textInput.className = "te-var-input";
+            textInput.type = "text";
+            textInput.value = val;
+            textInput.spellcheck = false;
+
+            const swatch = document.createElement("input");
+            swatch.type = "color";
+            swatch.className = "te-color-swatch";
+            const hex = cssToHex(val);
+            swatch.value = hex || "#888888";
+            if (!hex) swatch.style.opacity = ".4";
+
+            // Live update from text input
+            textInput.addEventListener("input", () => {
+              document.documentElement.style.setProperty(
+                varName,
+                textInput.value,
+              );
+              const h = cssToHex(textInput.value);
+              if (h) {
+                swatch.value = h;
+                swatch.style.opacity = "1";
+              }
+            });
+
+            // Live update from color picker
+            swatch.addEventListener("input", () => {
+              textInput.value = swatch.value;
+              swatch.style.opacity = "1";
+              document.documentElement.style.setProperty(varName, swatch.value);
+            });
+
+            row.append(nameEl, textInput, swatch);
+            rows.appendChild(row);
+          });
+
+          // Extra (non-color) vars
+          if (group === VAR_GROUPS[VAR_GROUPS.length - 1]) {
+            EXTRA_VARS.forEach((varName) => {
+              const val = current[varName] || "";
+              const row = document.createElement("div");
+              row.className = "te-row";
+              const nameEl = document.createElement("span");
+              nameEl.className = "te-var-name";
+              nameEl.textContent = varName;
+              const textInput = document.createElement("input");
+              textInput.className = "te-var-input";
+              textInput.type = "text";
+              textInput.value = val;
+              textInput.spellcheck = false;
+              textInput.style.gridColumn = "2 / span 2";
+              textInput.addEventListener("input", () => {
+                document.documentElement.style.setProperty(
+                  varName,
+                  textInput.value,
+                );
+              });
+              row.append(nameEl, textInput);
+              rows.appendChild(row);
+            });
+          }
+
+          sec.appendChild(rows);
+          teVarsCont.appendChild(sec);
+        });
+      }
+
+      function buildEditorUI() {
+        buildPresets();
+        buildSavedList();
+        buildVarEditors();
+      }
+
+      // ── Save theme ──
+      teSaveBtn.addEventListener("click", () => {
+        const name = teSaveName.value.trim();
+        if (!name) {
+          teSaveName.focus();
+          return;
+        }
+        savedThemes[name] = readCurrentVars();
+        persistSavedThemes();
+        teSaveName.value = "";
+        buildSavedList();
+        showToast(`saved "${name}"`);
+      });
+      teSaveName.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") teSaveBtn.click();
+      });
+
+      // ── Export ──
+      teExport.addEventListener("click", () => {
+        const data = JSON.stringify(readCurrentVars(), null, 2);
+        const blob = new Blob([data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "theme.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("theme exported");
+      });
+
+      // ── Import ──
+      teImport.addEventListener("click", () => teImportFile.click());
+      teImportFile.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            // Validate: must be an object with at least one known CSS variable
+            if (typeof data !== "object" || Array.isArray(data))
+              throw new Error("Invalid format");
+            const knownVars = [
+              ...VAR_GROUPS.flatMap((g) => g.vars),
+              ...EXTRA_VARS,
+            ];
+            const validKeys = Object.keys(data).filter((k) =>
+              knownVars.includes(k),
+            );
+            if (validKeys.length === 0)
+              throw new Error("No valid CSS variables found");
+            applyThemeVars(data);
+            buildVarEditors();
+            showToast(`imported ${validKeys.length} variables`);
+          } catch (err) {
+            showToast("import failed: " + err.message);
+          }
+          teImportFile.value = "";
+        };
+        reader.readAsText(file);
+      });
+
+      /* ─── Boot ─── */
+      applyDarkLight();
+
+      // Apply saved active theme on load
+      if (savedThemes[activePreset]) {
+        applyThemeVars(savedThemes[activePreset]);
+      } else if (PRESETS[activePreset]) {
+        applyThemeVars(PRESETS[activePreset]);
+      }
+
+      render();
+    </script>
+  </body>
+</html>
