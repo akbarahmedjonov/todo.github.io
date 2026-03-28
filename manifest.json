@@ -5,6 +5,6 @@
   "description": "Custom start page / new tab",
   "permissions": ["geolocation"],
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
   }
 }
