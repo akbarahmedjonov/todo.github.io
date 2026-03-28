@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,26 +32,7 @@
         --shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
         --grain-op: 0.035;
       }
-      [data-theme="light"] {
-        --bg: #f4f1ec;
-        --bg-panel: rgba(0, 0, 0, 0.035);
-        --bg-input: rgba(0, 0, 0, 0.055);
-        --bg-item: rgba(0, 0, 0, 0.04);
-        --bg-item-hov: rgba(0, 0, 0, 0.07);
-        --bg-filter: rgba(0, 0, 0, 0.04);
-        --bg-filt-act: rgba(0, 0, 0, 0.1);
-        --border: rgba(0, 0, 0, 0.1);
-        --border-foc: rgba(0, 0, 0, 0.3);
-        --text: #1a1814;
-        --text-2: rgba(26, 24, 20, 0.5);
-        --text-3: rgba(26, 24, 20, 0.3);
-        --accent: #8a6f4e;
-        --accent-2: #6e5540;
-        --red: #c04040;
-        --green: #3a8a56;
-        --shadow: 0 32px 80px rgba(0, 0, 0, 0.12);
-        --grain-op: 0.025;
-      }
+
 
       /* ── Reset ── */
       *,
@@ -965,9 +946,6 @@
             <span class="todo-title">tasks</span>
             <div class="todo-header-right">
               <span class="counter" id="counter">0 left</span>
-              <button class="icon-btn" id="theme-btn" title="Toggle dark/light">
-                ☀️
-              </button>
               <button class="icon-btn" id="te-open-btn" title="Theme editor">
                 🎨
               </button>
@@ -1456,7 +1434,6 @@
       /* ═══════════════════════════════════════════
    THEME SYSTEM
 ═══════════════════════════════════════════ */
-      const THEME_MODE_KEY = "todo_theme_v1";
       const SAVED_THEMES_KEY = "themes_v1";
       const ACTIVE_THEME_KEY = "active_theme_v1";
 
@@ -1629,7 +1606,6 @@
       };
 
       // ── State ──
-      let isDark = localStorage.getItem(THEME_MODE_KEY) !== "light";
       let savedThemes = loadSavedThemes();
       let activePreset =
         localStorage.getItem(ACTIVE_THEME_KEY) || "default dark";
@@ -1664,18 +1640,6 @@
         });
         return result;
       }
-
-      // ── Dark/light toggle ──
-      const themeBtn = document.getElementById("theme-btn");
-      function applyDarkLight() {
-        document.documentElement.dataset.theme = isDark ? "dark" : "light";
-        themeBtn.textContent = isDark ? "☀️" : "🌙";
-        localStorage.setItem(THEME_MODE_KEY, isDark ? "dark" : "light");
-      }
-      themeBtn.addEventListener("click", () => {
-        isDark = !isDark;
-        applyDarkLight();
-      });
 
       // ── Toast ──
       const toastEl = document.getElementById("te-toast");
@@ -1951,8 +1915,6 @@
       });
 
       /* ─── Boot ─── */
-      applyDarkLight();
-
       // Apply saved active theme on load
       if (savedThemes[activePreset]) {
         applyThemeVars(savedThemes[activePreset]);
