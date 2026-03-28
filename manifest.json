@@ -6,5 +6,9 @@
   "permissions": ["geolocation"],
   "background": {
     "service_worker": "background.js"
+  },
+  "chrome_settings_overrides": {
+    "homepage": "index.html",
+    "startup_pages": ["index.html"]
   }
 }
